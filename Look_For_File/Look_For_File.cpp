@@ -3,6 +3,8 @@
 #include <tchar.h>
 #include <string>
 #include <algorithm>
+#include <locale>
+#include <codecvt>
 
 bool ContainsChinese(const std::wstring& str) {
     for (wchar_t ch : str) {
@@ -43,7 +45,25 @@ int wmain(int argc, wchar_t* argv[]) {
     system("cls");
     if (argc < 2) {
         std::wcout << L"Usage: Look_For_File <file_name>" << std::endl;
-        return 1;
+        std::string names;
+        std::wcout << L"Please enter the name of the file you are looking for:";
+        std::cin >> names;
+        // 使用wstring_convert和codecvt来转换字符串
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+        // 将std::string转换为std::wstring
+        std::wstring wstr = converter.from_bytes(names);
+
+        // 将std::wstring转换为wchar_t*
+        wchar_t* wideCharStr = new wchar_t[wstr.length() + 1];
+        std::copy(wstr.begin(), wstr.end(), wideCharStr);
+        wideCharStr[wstr.length()] = '\0'; // 确保字符串以空字符结尾
+        file_name = wideCharStr;
+        for (wchar_t drive = L'A'; drive <= L'Z'; ++drive) {
+            std::wstring rootPath = std::wstring(1, drive) + L":";
+            ListFiles(rootPath);
+        }
+        return 0;
     }
 
     file_name = argv[1];
